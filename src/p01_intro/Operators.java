@@ -40,7 +40,6 @@ public class Operators {
         System.out.println(c != d); // Not equal (True)
         System.out.println(c >= e); // Greater than or equal (True)
         System.out.println(c > d); // Greater than (True)
-        System.out.println(c >= e); // Greater than or equal (True)
         System.out.println(c < d); // Less than (False)
         System.out.println(c <= e); // Less than or equal (True)
 
