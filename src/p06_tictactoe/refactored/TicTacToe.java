@@ -8,5 +8,6 @@ public class TicTacToe {
         Game game = new Game();
         GameFrame frame;
         frame = new GameFrame(game);
+        game.setGameListener(frame);
     }
 }

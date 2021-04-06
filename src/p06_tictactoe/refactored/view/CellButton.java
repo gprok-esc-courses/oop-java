@@ -18,7 +18,9 @@ public class CellButton extends JButton {
         addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                cellButtonListener.buttonClicked(row, col);
+                int v = cellButtonListener.buttonClicked(row, col);
+                setText(v == 1 ? "X" : "O");
+                setEnabled(false);
             }
         });
     }
