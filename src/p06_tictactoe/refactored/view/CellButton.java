@@ -24,4 +24,9 @@ public class CellButton extends JButton {
             }
         });
     }
+
+    public void reset() {
+        setEnabled(true);
+        setText("-");
+    }
 }
