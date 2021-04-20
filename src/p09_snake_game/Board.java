@@ -2,12 +2,12 @@ package p09_snake_game;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+import java.awt.event.*;
 import java.util.Random;
 import java.util.Vector;
 
-public class Board extends JPanel implements KeyListener {
+public class Board extends JPanel implements KeyListener,
+        ActionListener {
 
     public static final int BOARD_SIZE = 300;
     public static final int CELL_SIZE = 10;
@@ -15,19 +15,32 @@ public class Board extends JPanel implements KeyListener {
     public static final int DOWN = 2;
     public static final int LEFT = 3;
     public static final int RIGHT = 4;
+    public static final int DELAY = 200;
 
     private Vector<SnakeCell> snake;
     private FruitCell fruit;
     private int direction;
+    private boolean gameOver;
+    private Timer timer;
 
     public Board() {
-        initSnake();
-        placeFruit();
-        direction = UP;
+        timer = null;
+        reset();
         setFocusable(true);
         setBackground(Color.CYAN);
         setPreferredSize(new Dimension(BOARD_SIZE, BOARD_SIZE));
         addKeyListener(this);
+    }
+
+    public void reset() {
+        initSnake();
+        placeFruit();
+        gameOver = false;
+        direction = UP;
+        if(timer == null) {
+            timer = new Timer(DELAY, this);
+        }
+        timer.start();
     }
 
     public void initSnake() {
@@ -51,22 +64,45 @@ public class Board extends JPanel implements KeyListener {
                 head.getY() == fruit.getY());
     }
 
+    public boolean outOfBoard() {
+        SnakeCell head = snake.firstElement();
+        return head.getX() < 0 || head.getY() < 0 ||
+                head.getX() >= BOARD_SIZE || head.getY() >= BOARD_SIZE;
+    }
+
+    public boolean onSnakeBody() {
+        SnakeCell head = snake.firstElement();
+        for(int idx = 1; idx < snake.size(); idx++) {
+            SnakeCell current = snake.elementAt(idx);
+            if(head.getX() == current.getX() &&
+                    head.getY() == current.getY()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        for (SnakeCell cell : snake) {
-            if(cell.isHead()) {
-                g.setColor(Color.RED);
+        if(!gameOver) {
+            for (SnakeCell cell : snake) {
+                if (cell.isHead()) {
+                    g.setColor(Color.RED);
+                } else {
+                    g.setColor(new Color(0, 100, 0));
+                }
+                g.fillRect(cell.getX(), cell.getY(), CELL_SIZE, CELL_SIZE);
             }
-            else {
-                g.setColor(new Color(0, 100, 0));
-            }
-            g.fillRect(cell.getX(), cell.getY(), CELL_SIZE, CELL_SIZE);
-        }
 
-        g.setColor(Color.MAGENTA);
-        g.fillOval(fruit.getX(), fruit.getY(), CELL_SIZE, CELL_SIZE);
+            g.setColor(Color.MAGENTA);
+            g.fillOval(fruit.getX(), fruit.getY(), CELL_SIZE, CELL_SIZE);
+        }
+        else {
+            g.setColor(Color.BLACK);
+            g.drawString("GAME OVER", 100, 150);
+        }
     }
 
     public void moveSnake() {
@@ -101,6 +137,10 @@ public class Board extends JPanel implements KeyListener {
             snake.add(newCell);
             placeFruit();
         }
+        if(outOfBoard() || onSnakeBody()) {
+            gameOver = true;
+            timer.stop();
+        }
     }
 
     @Override
@@ -122,12 +162,20 @@ public class Board extends JPanel implements KeyListener {
             case KeyEvent.VK_RIGHT:
                 direction = direction != LEFT ? RIGHT : direction;
                 break;
+            case KeyEvent.VK_SPACE:
+                if(gameOver) {
+                    reset();
+                }
+                break;
         }
-
-        moveSnake();
-        repaint();
     }
 
     @Override
     public void keyReleased(KeyEvent e) { }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        moveSnake();
+        repaint();
+    }
 }
